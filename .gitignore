@@ -61,4 +61,4 @@ typings/
 .next
 
 # Transpiled typescript
-# dist/
+dist/
