@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 import fileUpload from 'express-fileupload';
 
@@ -8,6 +9,7 @@ import { userRouter } from './routers/user.router';
 const app = express();
 app.use(express.json());
 app.use(fileUpload());
+app.use(cors());
 
 connect();
 

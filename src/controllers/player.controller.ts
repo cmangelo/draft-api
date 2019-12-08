@@ -1,17 +1,14 @@
-import express from 'express';
-import mongoose from 'mongoose';
+import { Request, Response } from 'express';
+import { Document } from 'mongoose';
 
+import { Group as eGroup } from '../models/enums/group.enum';
 import { Group } from '../models/players/group.model';
 import { Player } from '../models/players/player.model';
 import { Tier } from '../models/players/tier.model';
 
-export const getPlayers = async (req: express.Request, res: express.Response) => {
-    const position = req.query.position;
-
+export const getPlayers = async (req: Request, res: Response) => {
     try {
-        const players = !!position
-            ? await Player.find({ position })
-            : await Player.find();
+        const players = await Player.find();
 
         if (!players) {
             res.status(404).send();
@@ -23,8 +20,33 @@ export const getPlayers = async (req: express.Request, res: express.Response) =>
     }
 }
 
-export const addPlayers = async (req: express.Request, res: express.Response) => {
+export const getTiersAndGroups = async (req: any, res: Response) => {
+    const userId = req.user._id;
+    try {
+        const groups = await Group.find({ owner: userId });
+        let alreadyFoundGroups: Array<number> = [];
+        const newestOfEachGroup = sortArrayByProp(groups, 'createdAt').filter(group => {
+            const alreadyFound = alreadyFoundGroups.includes(group.position);
+            alreadyFoundGroups.push(group.position);
+            return !alreadyFound;
+        });
+        const tiers: Array<any> = [];
+        for (const group of newestOfEachGroup) {
+            const tier = await Tier.find({ group: group._id }).sort({
+                tier: 1
+            });
+            tiers.push(tier);
+        }
+        res.send({ tiers, groups: newestOfEachGroup });
+
+    } catch {
+        res.status(400).send();
+    }
+}
+
+export const addPlayers = async (req: any, res: Response) => {
     const groupId = +req.params.groupId;
+    const userId = req.user._id;
 
     try {
         if (Object.keys((<any>req).files).length === 0) {
@@ -35,26 +57,33 @@ export const addPlayers = async (req: express.Request, res: express.Response) =>
 
             let tiersObject = players.reduce(groupPlayersByTier, {});
             let groupModel = new Group({
-                position: groupId
+                position: groupId,
+                owner: userId
             });
 
             let group = await groupModel.save();
             let startingAtRankRunningTotal = 1;
 
             for (const key of Object.keys(tiersObject)) {
-                const sortedPlayers = sortArray(tiersObject[key], 'rank');
+                const sortedPlayers = sortArrayByProp(tiersObject[key], 'rank');
                 let playerIds = [];
                 for (let player of sortedPlayers) {
                     let existingPlayer = await Player.findOne({
                         name: player.name,
                         team: player.team
-                    }) as mongoose.Document & { position: number };
+                    }) as Document & { position: number, adp: number, notes: string, points: number, risk: number, team: string };
 
                     if (existingPlayer) {
-                        if (existingPlayer.position = -1) {
+                        if (existingPlayer.position = eGroup.NONE) {
                             existingPlayer.position = groupId;
-                            await existingPlayer.save();
                         }
+                        existingPlayer.adp = player.adp;
+                        existingPlayer.notes = player.notes;
+                        existingPlayer.points = player.points;
+                        existingPlayer.risk = player.risk;
+                        existingPlayer.team = player.team;
+                        await existingPlayer.save();
+
                         playerIds.push(existingPlayer._id);
                     } else {
                         let playerModel = new Player(
@@ -82,7 +111,7 @@ export const addPlayers = async (req: express.Request, res: express.Response) =>
     }
 }
 
-function convertCSVToJS(csv: string, groupId: number) {
+const convertCSVToJS = (csv: string, groupId: number) => {
     let rows = csv.split('\n');
     let headers = rows[0].split(',').map(field => field.substring(1, field.length - 1));
     headers[headers.length - 1] = headers[headers.length - 1].substring(0, headers[headers.length - 1].length - 1); //trim new line character from last element in list
@@ -100,7 +129,7 @@ function convertCSVToJS(csv: string, groupId: number) {
             }
         });
 
-        let position = groupId !== 4 ? groupId : -1;
+        let position = groupId !== eGroup.FLEX ? groupId : eGroup.NONE;
 
         players.push({
             bye: player['Bye Week'],
@@ -118,7 +147,7 @@ function convertCSVToJS(csv: string, groupId: number) {
     return players;
 }
 
-const groupPlayersByTier = (acc: any, player: any) => {
+const groupPlayersByTier = (acc: any, player: any): any => {
     var tier = player.tier;
     if (!acc[tier]) {
         acc[tier] = [];
@@ -127,7 +156,7 @@ const groupPlayersByTier = (acc: any, player: any) => {
     return acc;
 }
 
-const sortArray = (arr: any, property: any) => {
+const sortArrayByProp = (arr: any, property: any): Array<any> => {
     return arr.sort((a: any, b: any) => {
         return parseInt(a[property]) < parseInt(b[property]) ? -1 : 1;
     });
