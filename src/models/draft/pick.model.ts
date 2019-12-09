@@ -1,20 +1,29 @@
-import mongoose from 'mongoose';
+import { model, Schema } from 'mongoose';
 
-const PickSchema = new mongoose.Schema({
+const PickSchema = new Schema({
     overall: {
         type: Number,
         required: true,
     },
     player: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true,
         ref: 'Player'
     },
     draft: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true,
         ref: 'Draft'
     }
 });
 
-export const Pick = mongoose.model('Pick', PickSchema);
+PickSchema.methods.toJSON = function () {
+    const pick = this;
+    const pickObj = pick.toObject();
+
+    delete pickObj._id;
+    delete pickObj.__v;
+    return pickObj;
+}
+
+export const Pick = model('Pick', PickSchema);

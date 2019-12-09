@@ -3,6 +3,7 @@ import express from 'express';
 import fileUpload from 'express-fileupload';
 
 import { connect } from './db/mongoose';
+import { draftRouter } from './routers/draft.router';
 import { playerRouter } from './routers/player.router';
 import { userRouter } from './routers/user.router';
 
@@ -15,6 +16,7 @@ connect();
 
 app.use('/users', userRouter);
 app.use('/players', playerRouter);
+app.use('/drafts', draftRouter);
 
 const port = 3000;
 app.listen(port, err => {
