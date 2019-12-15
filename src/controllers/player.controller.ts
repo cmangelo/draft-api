@@ -30,12 +30,12 @@ export const getTiersAndGroups = async (req: any, res: Response) => {
             alreadyFoundGroups.push(group.position);
             return !alreadyFound;
         });
-        const tiers: Array<any> = [];
+        let tiers: Array<any> = [];
         for (const group of newestOfEachGroup) {
             const tier = await Tier.find({ group: group._id }).sort({
                 tier: 1
             });
-            tiers.push(tier);
+            tiers = tiers.concat(tier);
         }
         res.send({ tiers, groups: newestOfEachGroup });
 
