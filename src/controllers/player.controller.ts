@@ -32,10 +32,10 @@ export const getTiersAndGroups = async (req: any, res: Response) => {
         });
         let tiers: Array<any> = [];
         for (const group of newestOfEachGroup) {
-            const tier = await Tier.find({ group: group._id }).sort({
-                tier: 1
-            });
-            tiers = tiers.concat(tier);
+            for (const tierId of group.tiers) {
+                const tier = await Tier.findById(tierId);
+                tiers.push(tier);
+            }
         }
         res.send({ tiers, groups: newestOfEachGroup });
 
@@ -97,10 +97,11 @@ export const addPlayers = async (req: any, res: Response) => {
                 const tier = new Tier({
                     tierNumber: parseInt(key),
                     startingAtRank: startingAtRankRunningTotal,
-                    players: playerIds,
-                    group: group._id
+                    players: playerIds
                 });
                 await tier.save();
+                (group as any).tiers.push(tier._id);
+                await group.save();
 
                 startingAtRankRunningTotal += playerIds.length;
             }

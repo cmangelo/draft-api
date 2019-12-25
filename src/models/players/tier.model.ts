@@ -13,12 +13,7 @@ const tierSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'Player'
-    }],
-    group: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Group'
-    }
+    }]
 }, {
     timestamps: true,
 });

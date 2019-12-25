@@ -9,8 +9,11 @@ const groupSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'User'
-
-    }
+    },
+    tiers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tier'
+    }]
 }, {
     timestamps: true,
 });
