@@ -8,7 +8,14 @@ import { Tier } from '../models/players/tier.model';
 
 export const getPlayers = async (req: Request, res: Response) => {
     try {
-        const players = await Player.find();
+        const playerProjection = {
+            bye: false,
+            points: false,
+            notes: false,
+            risk: false
+        };
+
+        const players = await Player.find({}, playerProjection);
 
         if (!players) {
             res.status(404).send();

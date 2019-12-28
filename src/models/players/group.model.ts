@@ -18,4 +18,15 @@ const groupSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+groupSchema.methods.toJSON = function () {
+    const group = this;
+    const groupObj = group.toObject();
+
+    delete groupObj.createdAt;
+    delete groupObj.updatedAt;
+    delete groupObj.__v;
+    delete groupObj.owner;
+    return groupObj;
+}
+
 export const Group = mongoose.model('Group', groupSchema);

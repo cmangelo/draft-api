@@ -22,4 +22,14 @@ tierSchema.set('toJSON', {
     virtuals: true
 });
 
+tierSchema.methods.toJSON = function () {
+    const tier = this;
+    const tierObj = tier.toObject();
+
+    delete tierObj.createdAt;
+    delete tierObj.updatedAt;
+    delete tierObj.__v;
+    return tierObj;
+}
+
 export const Tier = mongoose.model('Tier', tierSchema);

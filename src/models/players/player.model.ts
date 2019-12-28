@@ -39,4 +39,14 @@ const PlayerSchema = new mongoose.Schema({
     timestamps: true
 });
 
+PlayerSchema.methods.toJSON = function () {
+    const player = this;
+    const playerObj = player.toObject();
+
+    delete playerObj.createdAt;
+    delete playerObj.updatedAt;
+    delete playerObj.__v;
+    return playerObj;
+}
+
 export const Player = mongoose.model('Player', PlayerSchema);
