@@ -81,7 +81,7 @@ export const addPlayers = async (req: any, res: Response) => {
                     }) as Document & { position: number, adp: number, notes: string, points: number, risk: number, team: string };
 
                     if (existingPlayer) {
-                        if (existingPlayer.position = eGroup.NONE) {
+                        if (existingPlayer.position === eGroup.NONE) {
                             existingPlayer.position = groupId;
                         }
                         existingPlayer.adp = player.adp;
