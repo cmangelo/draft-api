@@ -9,7 +9,7 @@ import { Tier } from '../models/players/tier.model';
 export const getPlayers = async (req: Request, res: Response) => {
     try {
         const playerProjection = {
-            bye: false,
+            // bye: false,
             points: false,
             notes: false,
             risk: false

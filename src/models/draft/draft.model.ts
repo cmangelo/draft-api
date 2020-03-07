@@ -58,6 +58,8 @@ const DraftSchema = new mongoose.Schema({
         default: 1,
         required: true
     }
+}, {
+    timestamps: true
 });
 
 export const Draft = mongoose.model('Draft', DraftSchema);

@@ -3,15 +3,6 @@ import { Router } from 'express';
 import * as draftController from '../controllers/draft.controller';
 import { auth } from '../middleware/auth.middleware';
 
-
-
-
-
-
-
-
-
-
 export const draftRouter = Router();
 
 draftRouter.get('/:draftId', auth, draftController.getDraft);
