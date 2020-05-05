@@ -1,12 +1,14 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { Document } from 'mongoose';
 
 import { Group as eGroup } from '../models/enums/group.enum';
 import { Group } from '../models/players/group.model';
 import { Player } from '../models/players/player.model';
+import { Ranking } from '../models/players/ranking.model';
 import { Tier } from '../models/players/tier.model';
 
-export const getPlayers = async (req: Request, res: Response) => {
+export const getPlayers = async (req: any, res: Response) => {
+    const userId = req.user._id;
     try {
         const playerProjection = {
             // bye: false,
@@ -15,15 +17,25 @@ export const getPlayers = async (req: Request, res: Response) => {
             risk: false
         };
 
-        const players = await Player.find({}, playerProjection);
+        //using lean to get plain js objects, mongoose documents don't allow for adding extra properties
+        const players = await Player.find({}).lean();
+
+        const rankings = await Ranking.find({ user: userId });
+
+        if (rankings) {
+            rankings.forEach((ranking: any) => {
+                let player = players.find(player => player._id.toString() === ranking.player.toString()) as any;
+                player.userRank = ranking.rank;
+            });
+        }
 
         if (!players) {
             res.status(404).send();
             return;
         }
         res.send(players);
-    } catch {
-        res.status(400).send();
+    } catch (err) {
+        res.status(400).send(err.message);
     }
 }
 
@@ -114,6 +126,47 @@ export const addPlayers = async (req: any, res: Response) => {
             }
             res.status(201).send();
         }
+    } catch {
+        res.status(400).send();
+    }
+}
+
+export const addPlayerRanking = async (req: any, res: Response) => {
+    const playerId = req.params.playerId;
+    const userId = req.user._id;
+    const rank = req.query.rank;
+
+    try {
+        const ranking = await Ranking.findOneAndUpdate({ player: playerId, user: userId }, { rank });
+        if (ranking) {
+            res.status(204).send();
+            return;
+        }
+
+        const newRanking = new Ranking({
+            rank,
+            player: playerId,
+            user: userId
+        });
+        await newRanking.save();
+        res.status(201).send();
+    } catch {
+        res.status(400).send();
+    }
+}
+
+export const deletePlayerRanking = async (req: any, res: Response) => {
+    const playerId = req.params.playerId;
+    const userId = req.user._id;
+
+    try {
+        const deleted = await Ranking.findOneAndDelete({ player: playerId, user: userId });
+        if (!deleted) {
+            res.status(404).send();
+            return;
+        }
+
+        res.send();
     } catch {
         res.status(400).send();
     }

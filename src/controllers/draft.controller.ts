@@ -3,9 +3,10 @@ import { Request, Response } from 'express';
 import { Draft } from '../models/draft/draft.model';
 import { Pick } from '../models/draft/pick.model';
 
-//todo: set up pagination on this route
 export const getDrafts = async (req: any, res: Response) => {
     const userId = req.user._id;
+    const page = +req.query.page;
+
     try {
         const draftProjection = {
             QBs: false,
@@ -19,7 +20,11 @@ export const getDrafts = async (req: any, res: Response) => {
             updatedAt: false
         }
         const drafts = await Draft.find({ owner: userId }, draftProjection).sort({ createdAt: -1 });
-        res.send(drafts);
+
+        const start = (page - 1) * 10;
+        const end = start + 10;
+
+        res.send(drafts.slice(start, end));
     } catch {
         res.status(400).send();
     }

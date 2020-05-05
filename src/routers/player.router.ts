@@ -10,3 +10,7 @@ playerRouter.get('/groups', auth, playerController.getTiersAndGroups);
 playerRouter.get('/', auth, playerController.getPlayers);
 
 playerRouter.post('/:groupId', auth, playerController.addPlayers);
+
+playerRouter.put('/:playerId/rankings', auth, playerController.addPlayerRanking);
+
+playerRouter.delete('/:playerId/rankings', auth, playerController.deletePlayerRanking);
