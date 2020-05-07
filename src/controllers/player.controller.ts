@@ -11,21 +11,22 @@ export const getPlayers = async (req: any, res: Response) => {
     const userId = req.user._id;
     try {
         const playerProjection = {
-            // bye: false,
             points: false,
             notes: false,
             risk: false
         };
 
-        //using lean to get plain js objects, mongoose documents don't allow for adding extra properties
-        const players = await Player.find({}).lean();
+        let players = await Player.find({}, playerProjection);
 
         const rankings = await Ranking.find({ user: userId });
 
         if (rankings) {
-            rankings.forEach((ranking: any) => {
-                let player = players.find(player => player._id.toString() === ranking.player.toString()) as any;
-                player.userRank = ranking.rank;
+            players = players.map((player: any) => {
+                const userRank = rankings.find((ranking: any) => ranking.player.toString() == player._id.toString()) as any;
+                if (userRank)
+                    player.userRank = userRank.rank;
+
+                return player;
             });
         }
 
@@ -36,6 +37,26 @@ export const getPlayers = async (req: any, res: Response) => {
         res.send(players);
     } catch (err) {
         res.status(400).send(err.message);
+    }
+}
+
+export const getPlayerDetail = async (req: any, res: Response) => {
+    const playerId = req.params.playerId;
+    const userId = req.user._id;
+
+    try {
+        const player = await Player.findById(playerId) as any;
+        if (!player) {
+            res.status(404).send();
+            return;
+        }
+        const ranking = await Ranking.findOne({ player: playerId, user: userId }) as any;
+        if (ranking) {
+            player.userRank = ranking.rank
+        }
+        res.send(player);
+    } catch {
+        res.status(400).send();
     }
 }
 

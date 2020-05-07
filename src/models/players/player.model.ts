@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const PlayerSchema = new mongoose.Schema({
+const playerSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
@@ -36,10 +36,16 @@ const PlayerSchema = new mongoose.Schema({
         type: Number
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
-PlayerSchema.methods.toJSON = function () {
+playerSchema.virtual('userRank')
+    .get(function (this: any) { return this._userRank })
+    .set(function (this: any, v: number) { this._userRank = v });
+
+playerSchema.methods.toJSON = function () {
     const player = this;
     const playerObj = player.toObject();
 
@@ -49,4 +55,4 @@ PlayerSchema.methods.toJSON = function () {
     return playerObj;
 }
 
-export const Player = mongoose.model('Player', PlayerSchema);
+export const Player = mongoose.model('Player', playerSchema);
