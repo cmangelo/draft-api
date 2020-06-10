@@ -14,7 +14,7 @@ app.use(cors());
 
 connect();
 
-app.get('/test', (req, res) => res.send('hiya'));
+app.get('/test', (req: any, res: any) => res.send('hiya'));
 app.use('/users', userRouter);
 app.use('/players', playerRouter);
 app.use('/drafts', draftRouter);

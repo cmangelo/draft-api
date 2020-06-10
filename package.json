@@ -4,7 +4,9 @@
   "description": "",
   "main": "dist/app.js",
   "scripts": {
-    "start": "ts-node src/app.ts",
+    "postinstall": "npm run tsc",
+    "tsc": "tsc",
+    "start": "node dist/app.js",
     "run": "tsc && node dist/app.js",
     "serve": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
