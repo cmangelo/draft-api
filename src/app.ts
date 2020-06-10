@@ -19,8 +19,8 @@ app.use('/users', userRouter);
 app.use('/players', playerRouter);
 app.use('/drafts', draftRouter);
 
-const port = 3000;
-app.listen(port, err => {
+const port = process.env.PORT as unknown as number | undefined || 3000;
+app.listen(port, (err: any) => {
     if (err) {
         return console.error(err);
     }
