@@ -15,7 +15,7 @@ export const createUser = async (req: express.Request, res: express.Response) =>
 
 export const loginUser = async (req: express.Request, res: express.Response) => {
     try {
-        const user = await (<UserModelType>User).findByCredentials(req.body.email, req.body.password);
+        const user = await (<UserModelType>User).findByCredentials(req.body.username, req.body.password);
         const token: string = await user.generateAuthToken();
         res.send({ user, token });
     } catch {
