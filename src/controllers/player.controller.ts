@@ -20,6 +20,33 @@ export const getPlayers = async (req: any, res: Response) => {
 
         const rankings = await Ranking.find({ user: userId });
 
+        let kicker = await Player.findOne({ position: 5 });
+        let defense = await Player.findOne({ position: 6 });
+
+        if (!kicker) {
+            kicker = await Player.create({
+                name: 'Kicker',
+                team: 'NFL',
+                bye: 0,
+                points: 0,
+                risk: 0,
+                adp: 0,
+                position: 5,
+            });
+        }
+
+        if (!defense) {
+            defense = await Player.create({
+                name: 'Defense/Special Teams',
+                team: 'NFL',
+                bye: 0,
+                points: 0,
+                risk: 0,
+                adp: 0,
+                position: 6
+            });
+        }
+
         if (rankings) {
             players = players.map((player: any) => {
                 const userRank = rankings.find((ranking: any) => ranking.player.toString() == player._id.toString()) as any;
@@ -29,6 +56,8 @@ export const getPlayers = async (req: any, res: Response) => {
                 return player;
             });
         }
+        players.push(kicker);
+        players.push(defense);
 
         if (!players) {
             res.status(404).send();

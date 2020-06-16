@@ -26,8 +26,7 @@ const playerSchema = new mongoose.Schema({
         required: true
     },
     notes: {
-        type: String,
-        required: true
+        type: String
     },
     position: {
         type: Number
