@@ -14,7 +14,7 @@ app.use(cors());
 
 connect();
 
-app.get('/test', (req: any, res: any) => res.send(process.env.MONGODB_URI));
+app.get('/test', (req: any, res: any) => res.send('hiya'));
 app.use('/users', userRouter);
 app.use('/players', playerRouter);
 app.use('/drafts', draftRouter);
