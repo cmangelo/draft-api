@@ -92,7 +92,9 @@ export const getPlayerDetail = async (req: any, res: Response) => {
 export const getTiersAndGroups = async (req: any, res: Response) => {
     const userId = req.user._id;
     try {
-        const groups = await Group.find({ owner: userId });
+        // commented this out so all users have access to rankings
+        // const groups = await Group.find({ owner: userId });
+        const groups = await Group.find();
         let alreadyFoundGroups: Array<number> = [];
         const newestOfEachGroup = sortArrayByProp(groups, 'createdAt').filter(group => {
             const alreadyFound = alreadyFoundGroups.includes(group.position);
